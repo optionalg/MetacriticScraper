@@ -1,8 +1,11 @@
 __author__ = 'zhoutuoyang'
+import time
 import json
 import requests
 
 last_fm_url = 'http://ws.audioscrobbler.com/2.0/'
+_MINIMUM_DELAY = 2
+delay_time = _MINIMUM_DELAY # default delay after API call in case of banning account
 try:
     with open('last_fm_api_key.txt') as f:
         api_key = f.read()
@@ -44,6 +47,7 @@ def get_top_artists(country="UNITED STATES", pages=10):
                 'name': artist['name'],
                 'mbid': artist['mbid']
             })
+    delayMe()
     return artists_container
 
 
@@ -63,6 +67,7 @@ def get_top_albums(mbid):
         'limit': limit
     })
     top_albums = json.loads(response.text)
+    print top_albums
     albums = top_albums['topalbums']['album']
     # generate albums with specific format
     # each entry with name and mbid
@@ -71,6 +76,7 @@ def get_top_albums(mbid):
             'name': album['name'],
             'mbid': album['mbid']
         })
+    delayMe()
     return albums
 
 
@@ -94,4 +100,15 @@ def get_album_info(mbid):
     }
     ## load the tracks into album
     #album_trimed['tracks'] = [];
+    delayMe()
     return album_trimed
+
+
+def setDelayTime(time):
+    # time must be larger or equal to one sec
+    if time >= _MINIMUM_DELAY:
+        delay_time = time
+
+
+def delayMe():
+    time.sleep(delay_time)
