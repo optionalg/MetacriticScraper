@@ -49,7 +49,7 @@ def get_top_artists(country="UNITED STATES", pages=10):
                         'name': artist['name'],
                         'mbid': artist['mbid']
                     })
-            except KeyError as e:
+            except (KeyError, TypeError) as e:
                 print "Encounter improperly formated response"
                 print response.text
         delayMe()
