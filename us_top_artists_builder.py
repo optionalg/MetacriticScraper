@@ -45,5 +45,5 @@ def buildArtistsJSON():
         artist['topAlbums'] = top_albums_enhanced
     return json.dumps(artists, indent=4)
 
-with open('./artists.json') as f:
+with open('./artists.json', 'w', 1024) as f:
     f.write(buildArtistsJSON())
