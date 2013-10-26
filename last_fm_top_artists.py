@@ -32,86 +32,110 @@ def get_top_artists(country="UNITED STATES", pages=10):
             'format': 'json',
             'page': page
         })
-        top_artists = json.loads(response.text)
-        try:
-            artists = top_artists['topartists']['artist']
-            attr = top_artists['topartists']['@attr']
-            # check whether the current page is the page requested
-            # e.g. if there are only 10 pages, when requested the 11th one,
-            # Last.fm will still return 10th page
-            if int(attr['page']) != page:
-                break
-            # put artists in the format needed
-            # only name and mbid are necessary
-            for artist in artists:
-                if artist['mbid'] != '':
+        if response.status_code == requests.codes.ok:
+            top_artists = json.loads(response.text)
+            try:
+                artists = top_artists['topartists']['artist']
+                attr = top_artists['topartists']['@attr']
+                # check whether the current page is the page requested
+                # e.g. if there are only 10 pages, when requested the 11th one,
+                # Last.fm will still return 10th page
+                if int(attr['page']) != page:
+                    break
+                # put artists in the format needed
+                # only name and mbid are necessary
+                for artist in artists:
                     artists_container.append({
                         'name': artist['name'],
                         'mbid': artist['mbid']
                     })
-        except KeyError as e:
-            print "Encounter improperly formated response"
-            print e.message
+            except KeyError as e:
+                print "Encounter improperly formated response"
+                print response.text
         delayMe()
     return artists_container
 
 
-def get_top_albums(mbid):
+def get_top_albums(**kwargs):
     """
-        Get top albums of an artist specifiy by the mbid (musicbrainz ID).
+        Get top albums of an artist specifiy by the mbid (musicbrainz ID) or arist name,
+        otherwise an empty array will return
         The maxium number of albums returned will be less or equal to 10.
     """
+    # process arguments
+    arguments = {}
+    if 'mbid' in kwargs:
+        arguments['mbid'] = kwargs['mbid']
+    elif 'artist' in kwargs:
+        arguments['artist'] = kwargs['artist']
+    else:
+        return []
     limit = 10
-    album_container = []
-    # request Last.fm by using mbid
-    response = requests.get(last_fm_url, params={
+    extra_arguments = {
         'api_key': api_key,
         'method': 'artist.getTopAlbums',
-        'mbid': mbid,
         'format': 'json',
         'limit': limit
-    })
-    top_albums = json.loads(response.text)
-    try:
-        albums = top_albums['topalbums']['album']
-        # generate albums with specific format
-        # each entry with name and mbid
-        for album in albums:
-            album_container.append({
-                'name': album['name'],
-                'mbid': album['mbid']
-            })
-    except (KeyError, TypeError) as e:
-        print "Encounter improperly formated response"
-        print e.message
+    }
+
+    album_container = []
+    # request Last.fm
+    response = requests.get(last_fm_url, params=dict(arguments.items() + extra_arguments.items()))
+    if response.status_code == requests.codes.ok:
+        top_albums = json.loads(response.text)
+        try:
+            albums = top_albums['topalbums']['album']
+            # generate albums with specific format
+            # each entry with name and mbid
+            for album in albums:
+                album_container.append({
+                    'name': album['name'],
+                    'mbid': album['mbid']
+                })
+        except (KeyError, TypeError) as e:
+            print "Encounter improperly formated response"
+            print response.text
     delayMe()
     return album_container
 
 
-def get_album_info(mbid):
+def get_album_info(**kwargs):
     """
-        Get album information bsaed on mbid from Last.fm
+        Get album information bsaed on mbid from Last.fm using artist/album or mbid
     """
-    # request the album info
-    response = requests.get(last_fm_url, params={
+    # process arguments
+    arguments = {}
+    if 'mbid' in kwargs:
+        arguments['mbid'] = kwargs['mbid']
+    elif 'artist' in kwargs and 'album' in kwargs:
+        arguments['artist'] = kwargs['artist']
+        arguments['album'] = kwargs['album']
+    else:
+        return {}
+
+    extra_arguments = {
         'api_key': api_key,
         'method': 'album.getInfo',
-        'mbid': mbid,
         'format': 'json',
-    })
-    try:
-        # load text into dict
-        album = json.loads(response.text)['album']
-        album_trimed = {
-            'name': album['name'],
-            'mbid': album['mbid'],
-            'releaseDate': album['releasedate']
-        }
-        ## load the tracks into album
-        #album_trimed['tracks'] = [];
-    except KeyError as e:
-        print "Encounter improperly formated response"
-        print e.message
+    }
+
+    # request the album info
+    response = requests.get(last_fm_url, params=dict(arguments.items() + extra_arguments.items()))
+    album_trimed = {}
+    if response.status_code == requests.codes.ok:
+        try:
+            # load text into dict
+            album = json.loads(response.text)['album']
+            album_trimed = {
+                'name': album['name'],
+                'mbid': album['mbid'],
+                'releaseDate': album['releasedate']
+            }
+            ## load the tracks into album
+            #album_trimed['tracks'] = [];
+        except KeyError as e:
+            print "Encounter improperly formated response"
+            print response.text
     delayMe()
     return album_trimed
 
