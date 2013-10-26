@@ -51,6 +51,7 @@ def get_top_artists(country="UNITED STATES", pages=10):
                     })
         except KeyError as e:
             print "Encounter improperly formated response"
+            print e.message
         delayMe()
     return artists_container
 
@@ -80,10 +81,11 @@ def get_top_albums(mbid):
                 'name': album['name'],
                 'mbid': album['mbid']
             })
-    except KeyError as e:
+    except (KeyError, TypeError) as e:
         print "Encounter improperly formated response"
+        print e.message
     delayMe()
-    return albums
+    return album_container
 
 
 def get_album_info(mbid):
@@ -109,6 +111,7 @@ def get_album_info(mbid):
         #album_trimed['tracks'] = [];
     except KeyError as e:
         print "Encounter improperly formated response"
+        print e.message
     delayMe()
     return album_trimed
 
