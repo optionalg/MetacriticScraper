@@ -4,7 +4,7 @@ import json
 import requests
 
 last_fm_url = 'http://ws.audioscrobbler.com/2.0/'
-_MINIMUM_DELAY = 2
+_MINIMUM_DELAY = 1
 delay_time = _MINIMUM_DELAY # default delay after API call in case of banning account
 try:
     with open('last_fm_api_key.txt') as f:
@@ -33,22 +33,25 @@ def get_top_artists(country="UNITED STATES", pages=10):
             'page': page
         })
         top_artists = json.loads(response.text)
-        artists = top_artists['topartists']['artist']
-        attr = top_artists['topartists']['@attr']
-        # check whether the current page is the page requested
-        # e.g. if there are only 10 pages, when requested the 11th one,
-        # Last.fm will still return 10th page
-        if int(attr['page']) != page:
-            break
-        # put artists in the format needed
-        # only name and mbid are necessary
-        for artist in artists:
-            if artist['mbid'] != '':
-                artists_container.append({
-                    'name': artist['name'],
-                    'mbid': artist['mbid']
-                })
-    delayMe()
+        try:
+            artists = top_artists['topartists']['artist']
+            attr = top_artists['topartists']['@attr']
+            # check whether the current page is the page requested
+            # e.g. if there are only 10 pages, when requested the 11th one,
+            # Last.fm will still return 10th page
+            if int(attr['page']) != page:
+                break
+            # put artists in the format needed
+            # only name and mbid are necessary
+            for artist in artists:
+                if artist['mbid'] != '':
+                    artists_container.append({
+                        'name': artist['name'],
+                        'mbid': artist['mbid']
+                    })
+        except KeyError as e:
+            print "Encounter improperly formated response"
+        delayMe()
     return artists_container
 
 
@@ -68,15 +71,17 @@ def get_top_albums(mbid):
         'limit': limit
     })
     top_albums = json.loads(response.text)
-    print top_albums
-    albums = top_albums['topalbums']['album']
-    # generate albums with specific format
-    # each entry with name and mbid
-    for album in albums:
-        album_container.append({
-            'name': album['name'],
-            'mbid': album['mbid']
-        })
+    try:
+        albums = top_albums['topalbums']['album']
+        # generate albums with specific format
+        # each entry with name and mbid
+        for album in albums:
+            album_container.append({
+                'name': album['name'],
+                'mbid': album['mbid']
+            })
+    except KeyError as e:
+        print "Encounter improperly formated response"
     delayMe()
     return albums
 
@@ -92,15 +97,18 @@ def get_album_info(mbid):
         'mbid': mbid,
         'format': 'json',
     })
-    # load text into dict
-    album = json.loads(response.text)['album']
-    album_trimed = {
-        'name': album['name'],
-        'mbid': album['mbid'],
-        'releaseDate': album['releasedate']
-    }
-    ## load the tracks into album
-    #album_trimed['tracks'] = [];
+    try:
+        # load text into dict
+        album = json.loads(response.text)['album']
+        album_trimed = {
+            'name': album['name'],
+            'mbid': album['mbid'],
+            'releaseDate': album['releasedate']
+        }
+        ## load the tracks into album
+        #album_trimed['tracks'] = [];
+    except KeyError as e:
+        print "Encounter improperly formated response"
     delayMe()
     return album_trimed
 
