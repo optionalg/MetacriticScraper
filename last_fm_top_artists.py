@@ -36,6 +36,11 @@ def get_top_artists(country="UNITED STATES", pages=10):
             top_artists = json.loads(response.text)
             try:
                 artists = top_artists['topartists']['artist']
+                # type checking
+                # last.fm will return an object instead of an array
+                # unify the interface here
+                if isinstance(artists, dict):
+                    artists = [artists]
                 attr = top_artists['topartists']['@attr']
                 # check whether the current page is the page requested
                 # e.g. if there are only 10 pages, when requested the 11th one,
@@ -85,6 +90,9 @@ def get_top_albums(**kwargs):
         top_albums = json.loads(response.text)
         try:
             albums = top_albums['topalbums']['album']
+            # type checking
+            if isinstance(albums, dict):
+                albums = [albums]
             # generate albums with specific format
             # each entry with name and mbid
             for album in albums:
