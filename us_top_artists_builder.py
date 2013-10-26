@@ -1,4 +1,5 @@
 __author__ = 'zhoutuoyang'
+import os
 import json
 import last_fm_top_artists
 
@@ -8,6 +9,27 @@ import last_fm_top_artists
     Each entry comes with corresponding top albums, mbid, name
     Each album comes with title, mbid, release date
 """
+
+data_dir = './data/'
+
+
+def dataDirCheck():
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+
+
+def writeArtistJSON(artist):
+    if 'name' not in artist:
+        print "illegal artist object without a name"
+        return
+    filename = artist['name'] + '.json'
+    try:
+        with open(os.path.join(data_dir, filename), 'w+') as f:
+            f.write(json.dumps(artist, indent=4))
+    except IOError as e:
+        print e.message
+        print "failed to write file " + filename + ".json."
+
 
 def buildArtistsJSON():
     # get all the artists
@@ -43,7 +65,10 @@ def buildArtistsJSON():
                 top_albums_enhanced.append(album)
         # assign top album back to the artist
         artist['topAlbums'] = top_albums_enhanced
-    return json.dumps(artists, indent=4)
+        writeArtistJSON(artist)
 
-with open('./artists.json', 'w', 1024) as f:
-    f.write(buildArtistsJSON())
+
+# execuation section
+if __name__ == '__main__':
+    dataDirCheck()
+    buildArtistsJSON()
