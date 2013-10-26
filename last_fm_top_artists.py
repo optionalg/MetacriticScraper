@@ -43,10 +43,11 @@ def get_top_artists(country="UNITED STATES", pages=10):
         # put artists in the format needed
         # only name and mbid are necessary
         for artist in artists:
-            artists_container.append({
-                'name': artist['name'],
-                'mbid': artist['mbid']
-            })
+            if artist['mbid'] != '':
+                artists_container.append({
+                    'name': artist['name'],
+                    'mbid': artist['mbid']
+                })
     delayMe()
     return artists_container
 
