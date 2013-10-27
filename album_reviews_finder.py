@@ -74,6 +74,7 @@ def searchCandidateReviews(artist):
     try:
         with open(filepath, 'w+') as f:
             f.write(json.dumps(data, indent=4))
+            f.flush()
     except IOError as e:
         raise e
 

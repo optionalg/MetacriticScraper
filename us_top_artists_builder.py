@@ -26,6 +26,7 @@ def writeArtistJSON(artist):
     try:
         with open(os.path.join(data_dir, filename), 'w+') as f:
             f.write(json.dumps(artist, indent=4))
+            f.flush()
     except IOError as e:
         print e.message
         print "failed to write file " + filename + ".json."
