@@ -25,13 +25,17 @@ def get_top_artists(country="UNITED STATES", pages=10):
     """
     artists_container = []
     for page in range(pages):
-        response = requests.get(last_fm_url, params={
-            'api_key': api_key,
-            'method': 'geo.getTopArtists',
-            'country': country,
-            'format': 'json',
-            'page': page
-        })
+        try:
+            response = requests.get(last_fm_url, params={
+                'api_key': api_key,
+                'method': 'geo.getTopArtists',
+                'country': country,
+                'format': 'json',
+                'page': page
+            })
+        except requests.RequestException as e:
+            print e.message
+            continue
         if response.status_code == requests.codes.ok:
             top_artists = json.loads(response.text)
             try:
@@ -85,24 +89,27 @@ def get_top_albums(**kwargs):
 
     album_container = []
     # request Last.fm
-    response = requests.get(last_fm_url, params=dict(arguments.items() + extra_arguments.items()))
-    if response.status_code == requests.codes.ok:
-        top_albums = json.loads(response.text)
-        try:
-            albums = top_albums['topalbums']['album']
-            # type checking
-            if isinstance(albums, dict):
-                albums = [albums]
-            # generate albums with specific format
-            # each entry with name and mbid
-            for album in albums:
-                album_container.append({
-                    'name': album['name'],
-                    'mbid': album['mbid']
-                })
-        except (KeyError, TypeError) as e:
-            print "Encounter improperly formated response"
-            print response.text
+    try:
+        response = requests.get(last_fm_url, params=dict(arguments.items() + extra_arguments.items()))
+        if response.status_code == requests.codes.ok:
+            top_albums = json.loads(response.text)
+            try:
+                albums = top_albums['topalbums']['album']
+                # type checking
+                if isinstance(albums, dict):
+                    albums = [albums]
+                    # generate albums with specific format
+                # each entry with name and mbid
+                for album in albums:
+                    album_container.append({
+                        'name': album['name'],
+                        'mbid': album['mbid']
+                    })
+            except (KeyError, TypeError) as e:
+                print "Encounter improperly formated response"
+                print response.text
+    except requests.RequestException as e:
+        print e.message
     delayMe()
     return album_container
 
@@ -128,22 +135,25 @@ def get_album_info(**kwargs):
     }
 
     # request the album info
-    response = requests.get(last_fm_url, params=dict(arguments.items() + extra_arguments.items()))
     album_trimed = {}
-    if response.status_code == requests.codes.ok:
-        try:
-            # load text into dict
-            album = json.loads(response.text)['album']
-            album_trimed = {
-                'name': album['name'],
-                'mbid': album['mbid'],
-                'releaseDate': album['releasedate']
-            }
-            ## load the tracks into album
-            #album_trimed['tracks'] = [];
-        except KeyError as e:
-            print "Encounter improperly formated response"
-            print response.text
+    try:
+        response = requests.get(last_fm_url, params=dict(arguments.items() + extra_arguments.items()))
+        if response.status_code == requests.codes.ok:
+            try:
+                # load text into dict
+                album = json.loads(response.text)['album']
+                album_trimed = {
+                    'name': album['name'],
+                    'mbid': album['mbid'],
+                    'releaseDate': album['releasedate']
+                }
+                ## load the tracks into album
+                #album_trimed['tracks'] = [];
+            except KeyError as e:
+                print "Encounter improperly formated response"
+                print response.text
+    except requests.RequestException as e:
+        print e.message
     delayMe()
     return album_trimed
 
