@@ -14,6 +14,18 @@ except IOError:
     print "There is something wrong with api key file."
     exit()
 
+class Album(object):
+    def __init__(self, name, mbid, releaseDate=""):
+        self.name = name
+        self.mbid = mbid
+        self.releaseDate = releaseDate
+
+
+class Artist(object):
+    def __init__(self, name, mbid):
+        self.name = name
+        self.mbid = mbid
+        self.topAlbums = []
 
 def get_top_artists(country="UNITED STATES", pages=10):
     """
@@ -55,10 +67,9 @@ def get_top_artists(country="UNITED STATES", pages=10):
                 # put artists in the format needed
                 # only name and mbid are necessary
                 for artist in artists:
-                    artists_container.append({
-                        'name': artist['name'],
-                        'mbid': artist['mbid']
-                    })
+                    artists_container.append(
+                        Artist(artist['name'], artist['mbid'])
+                    )
             except (KeyError, TypeError) as e:
                 print "Encounter improperly formated response"
                 print response.text
@@ -66,18 +77,18 @@ def get_top_artists(country="UNITED STATES", pages=10):
     return artists_container
 
 
-def get_top_albums(**kwargs):
+def get_top_albums(artist):
     """
-        Get top albums of an artist specifiy by the mbid (musicbrainz ID) or arist name,
+        Get top albums of an object of artist specifiy by the mbid (musicbrainz ID) or arist name,
         otherwise an empty array will return
         The maxium number of albums returned will be less or equal to 10.
     """
     # process arguments
     arguments = {}
-    if 'mbid' in kwargs:
-        arguments['mbid'] = kwargs['mbid']
-    elif 'artist' in kwargs:
-        arguments['artist'] = kwargs['artist']
+    if artist.mbid:
+        arguments['mbid'] = artist.mbid
+    elif artist.name:
+        arguments['artist'] = artist.name
     else:
         return []
     limit = 10
@@ -87,7 +98,6 @@ def get_top_albums(**kwargs):
         'format': 'json',
         'limit': limit
     }
-
     album_container = []
     # request Last.fm
     try:
@@ -101,13 +111,10 @@ def get_top_albums(**kwargs):
                 # type checking
                 if isinstance(albums, dict):
                     albums = [albums]
-                    # generate albums with specific format
+                # generate albums with specific format
                 # each entry with name and mbid
                 for album in albums:
-                    album_container.append({
-                        'name': album['name'],
-                        'mbid': album['mbid']
-                    })
+                    album_container.append(Album(album['name'], album['mbid']))
             except (KeyError, TypeError) as e:
                 print "Encounter improperly formated response"
                 print response.text
@@ -117,20 +124,19 @@ def get_top_albums(**kwargs):
     return album_container
 
 
-def get_album_info(**kwargs):
+def get_album_info(album, artist=None):
     """
         Get album information bsaed on mbid from Last.fm using artist/album or mbid
     """
     # process arguments
     arguments = {}
-    if 'mbid' in kwargs:
-        arguments['mbid'] = kwargs['mbid']
-    elif 'artist' in kwargs and 'album' in kwargs:
-        arguments['artist'] = kwargs['artist']
-        arguments['album'] = kwargs['album']
+    if album.mbid:
+        arguments['mbid'] = album.mbid
+    elif artist and artist.name and album.name:
+        arguments['artist'] = artist.name
+        arguments['album'] = album.name
     else:
         return {}
-
     extra_arguments = {
         'api_key': api_key,
         'method': 'album.getInfo',
@@ -138,7 +144,6 @@ def get_album_info(**kwargs):
     }
 
     # request the album info
-    album_trimed = {}
     try:
         response = requests.get(last_fm_url,
                                 params=dict(arguments.items() + extra_arguments.items()),
@@ -146,12 +151,8 @@ def get_album_info(**kwargs):
         if response.status_code == requests.codes.ok:
             try:
                 # load text into dict
-                album = json.loads(response.text)['album']
-                album_trimed = {
-                    'name': album['name'],
-                    'mbid': album['mbid'],
-                    'releaseDate': album['releasedate']
-                }
+                album_info = json.loads(response.text)['album']
+                album.releaseDate = album_info['releasedate']
                 ## load the tracks into album
                 #album_trimed['tracks'] = [];
             except KeyError as e:
@@ -160,7 +161,7 @@ def get_album_info(**kwargs):
     except requests.RequestException as e:
         print e.message
     delayMe()
-    return album_trimed
+    return album
 
 
 def setDelayTime(time):
