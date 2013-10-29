@@ -33,16 +33,18 @@ def writeArtistJSON(artist):
 
 
 def buildArtistsJSON():
+    MBID = "mbid"
+    NAME = "name"
     # get all the artists
-    artists = last_fm_top_artists.get_top_artists("UNITED STATES", 1) # by default it is 10 pages, each with 50 aritists
+    artists = last_fm_top_artists.get_top_artists("UNITED STATES", 10) # by default it is 10 pages, each with 50 aritists
     for artist in artists:
         # for each artist, grab top albums
         artist_args = {}
         # arguments process
-        if 'mbid' in artist and artist['mbid'] != '':
-            artist_args['mbid'] = artist['mbid']
-        elif 'name' in artist:
-            artist_args['artist'] = artist['name']
+        if MBID in artist and artist[MBID] != '':
+            artist_args[MBID] = artist[MBID]
+        elif NAME in artist:
+            artist_args['artist'] = artist[NAME]
         # get top albums
         top_albums = last_fm_top_artists.get_top_albums(**artist_args)
         top_albums_enhanced = []
@@ -50,11 +52,11 @@ def buildArtistsJSON():
         for album in top_albums:
             # process album arguments
             album_args = {}
-            if 'mbid' in album and album['mbid'] != '':
-                album_args['mbid'] = album['mbid']
-            elif 'name' in album and 'name' in artist:
-                album_args['artist'] = artist['name']
-                album_args['album'] = album['name']
+            if MBID in album and album[MBID] != '':
+                album_args[MBID] = album[MBID]
+            elif NAME in album and NAME in artist:
+                album_args['artist'] = artist[NAME]
+                album_args['album'] = album[NAME]
             album_info = last_fm_top_artists.get_album_info(**album_args)
             # if album info is not empty
             if album_info:

@@ -20,7 +20,7 @@ def get_candidate_urls(album_name):
         releaseDateTag = album.find('span', class_='data')
         titleTag = album.find('h3', class_='product_title').a
         result.append({
-            'title': titleTag.get_text().strip(),
+            'name': titleTag.get_text().strip(),
             'url': metacritic + titleTag.get('href'),
             'artist': titleTag.get('href').split('/')[-1].replace('-', ' ').title(),
             'releaseDate': releaseDateTag.get_text().strip()
