@@ -5,6 +5,7 @@ import requests
 
 last_fm_url = 'http://ws.audioscrobbler.com/2.0/'
 _MINIMUM_DELAY = 1
+TIMEOUT_SEC = 60
 delay_time = _MINIMUM_DELAY # default delay after API call in case of banning account
 try:
     with open('last_fm_api_key.txt') as f:
@@ -32,7 +33,7 @@ def get_top_artists(country="UNITED STATES", pages=10):
                 'country': country,
                 'format': 'json',
                 'page': page
-            })
+            }, timeout=TIMEOUT_SEC)
         except requests.RequestException as e:
             print e.message
             continue
@@ -90,7 +91,9 @@ def get_top_albums(**kwargs):
     album_container = []
     # request Last.fm
     try:
-        response = requests.get(last_fm_url, params=dict(arguments.items() + extra_arguments.items()))
+        response = requests.get(last_fm_url,
+                                params=dict(arguments.items() + extra_arguments.items()),
+                                timeout=TIMEOUT_SEC)
         if response.status_code == requests.codes.ok:
             top_albums = json.loads(response.text)
             try:
@@ -137,7 +140,9 @@ def get_album_info(**kwargs):
     # request the album info
     album_trimed = {}
     try:
-        response = requests.get(last_fm_url, params=dict(arguments.items() + extra_arguments.items()))
+        response = requests.get(last_fm_url,
+                                params=dict(arguments.items() + extra_arguments.items()),
+                                timeout=TIMEOUT_SEC)
         if response.status_code == requests.codes.ok:
             try:
                 # load text into dict
