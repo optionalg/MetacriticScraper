@@ -29,7 +29,7 @@ def writeArtistJSON(artist):
             f.flush()
     except IOError as e:
         print e.message
-        print "failed to write file " + filename + ".json."
+        print "failed to write file " + filename
 
 
 def buildArtistsJSON():
