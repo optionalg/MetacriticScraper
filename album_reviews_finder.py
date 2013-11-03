@@ -4,6 +4,7 @@ import os
 import json
 import time
 import music_album_url
+import freebase_service
 
 data_dir = './data'
 reviews_dir = './review'
@@ -63,6 +64,10 @@ def searchCandidateReviews(artist):
     }
     # for each album, grab corresponding record
     for album in top_albums:
+        # checking whether this album is a single album
+        # if yes, skip this one
+        if freebase_service.checkAlbumSingle(album[NAME_STR], artist_name):
+            continue
         album['candidates'] = music_album_url.get_candidate_urls(album[NAME_STR])
         data[TOP_ALBUMS].append(album)
         # for each call, delay for 1 second
