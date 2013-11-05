@@ -1,5 +1,6 @@
 __author__ = 'zhoutuoyang'
 import json
+import re
 import requests
 
 try:
@@ -11,13 +12,14 @@ except IOError:
 
 service_url = 'https://www.googleapis.com/freebase/v1/'
 rdf_url = service_url + 'rdf'
+topic_url = service_url + 'topic'
 reconciliation_url = service_url + 'reconcile'
 params = {
     'key': api_key
 }
 
 
-def reconcile(name, kind, prop):
+def reconcile(name, kind, prop=None):
     """
         return mid of matched enitity or first candidate in the array.
         if candidate contains nothing or there is an error or a warning, return empty string
@@ -26,7 +28,8 @@ def reconcile(name, kind, prop):
     # process arguments
     params['name'] = name
     params['kind'] = kind
-    params['prop'] = prop
+    if prop:
+        params['prop'] = prop
     params['confidence'] = 0.5
 
     mid = None
@@ -45,9 +48,16 @@ def reconcile(name, kind, prop):
 
 def reconcileAlbum(album, artist):
     """
-        A implementated function specifically reconcile album from one artist
+        An implementated function specifically reconcile album from one artist
     """
     return reconcile(album, '/music/album', '/music/album/artist:{0}'.format(artist))
+
+
+def reconcileArtist(artist):
+    """
+        An implementated function specifically reconcile artist
+    """
+    return reconcile(artist, '/music/artist')
 
 
 def rdfLookup(mid):
@@ -58,6 +68,21 @@ def rdfLookup(mid):
     url = rdf_url + mid
     try:
         r = requests.get(url)
+        return r.text
+    except requests.RequestException:
+        # if error happens, return an empty string
+        return ""
+
+
+def topicLookup(mid, filter):
+    """
+        Topic look up API of freebase
+    """
+    url = topic_url + mid
+    try:
+        r = requests.get(url, params={
+            'filter': filter
+        })
         return r.text
     except requests.RequestException:
         # if error happens, return an empty string
@@ -78,3 +103,17 @@ def checkAlbumSingle(album, artist):
     if mid:
         return isAlbumSingle(rdfLookup(mid))
     return False
+
+
+def getArtistWikiLink(artist):
+    mid = reconcileArtist(artist)
+
+    if mid:
+        filter = '/type/object/key'
+        pattern = r'/wikipedia/en_id/(\d+)\"'
+        url = 'http://en.wikipedia.org/wiki/index.html?curid='
+        topic = topicLookup(mid, filter)
+        match = re.search(pattern, topic)
+        if match:
+            return url + match.group(1)
+    return None
