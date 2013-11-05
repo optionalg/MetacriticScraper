@@ -1,9 +1,9 @@
+from services import freebase_service
+
 __author__ = 'zhoutuoyang'
 
 import os
-import json
 import time
-import freebase_service
 
 data_dir = './data'
 wiki_dir = './wiki'

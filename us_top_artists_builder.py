@@ -1,7 +1,8 @@
+from services import last_fm_top_artists
+
 __author__ = 'zhoutuoyang'
 import os
 import json
-import last_fm_top_artists
 
 """
     This script will build a huge JSON file for top 500 artists in United Artists.

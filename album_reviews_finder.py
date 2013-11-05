@@ -1,10 +1,10 @@
+from services import music_album_url, freebase_service
+
 __author__ = 'zhoutuoyang'
 
 import os
 import json
 import time
-import music_album_url
-import freebase_service
 
 data_dir = './data'
 reviews_dir = './review'
