@@ -1,6 +1,7 @@
 __author__ = 'zhoutuoyang'
 
 import os
+import json
 from models.artist import Artist
 
 data_dir = './data'
@@ -32,7 +33,7 @@ def getArtistContent(filename):
         with open(filepath) as f:
             data = json.loads(f.read())
             artist = Artist(data['name'], data['mbid'])
-            artist.topAlbums = data['topAlbums']
+            artist.setTopAlbum(data['topAlbums'])
         return artist
     except IOError:
         raise
