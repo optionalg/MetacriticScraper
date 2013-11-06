@@ -2,6 +2,8 @@ __author__ = 'zhoutuoyang'
 import time
 import json
 import requests
+from models.album import Album
+from models.artist import Artist
 
 last_fm_url = 'http://ws.audioscrobbler.com/2.0/'
 _MINIMUM_DELAY = 1
@@ -13,19 +15,6 @@ try:
 except IOError:
     print "There is something wrong with api key file."
     exit()
-
-class Album(object):
-    def __init__(self, name, mbid, releaseDate=""):
-        self.name = name
-        self.mbid = mbid
-        self.releaseDate = releaseDate
-
-
-class Artist(object):
-    def __init__(self, name, mbid):
-        self.name = name
-        self.mbid = mbid
-        self.topAlbums = []
 
 def get_top_artists(country="UNITED STATES", pages=10):
     """
