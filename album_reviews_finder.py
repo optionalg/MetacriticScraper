@@ -1,10 +1,10 @@
-from services import music_album_url, freebase_service
-
 __author__ = 'zhoutuoyang'
 
 import os
 import json
 import time
+import data_folder_reader
+from services import music_album_url, freebase_service
 
 data_dir = './data'
 reviews_dir = './review'
@@ -16,34 +16,6 @@ def dirChecking():
     if not os.path.exists(reviews_dir):
         os.mkdir(reviews_dir)
 
-
-def scanArtistJSON():
-    """
-        Grab all files end with .json
-        So make sure that every json file in data dir is about an artist
-    """
-    for file in os.listdir(data_dir):
-        if file.endswith('.json'):
-            yield file
-
-
-def getArtistFile(filemame):
-    """
-        Read json file from data dir, and grab corresponding Artist info
-    """
-    # checking extension
-    if not filemame.endswith('.json'):
-        raise ValueError('this is not a JSON file')
-    filepath = os.path.join(data_dir, filemame)
-    # checking exisitence
-    if not  os.path.exists(filepath):
-        raise IOError('this file does not exist')
-    # read file and load into a dict
-    with open(filepath) as f:
-        data = json.loads(f.read())
-    return data
-
-
 def searchCandidateReviews(artist):
     """
         Get all candidate reviews from metacrtic.com,
@@ -53,8 +25,8 @@ def searchCandidateReviews(artist):
     NAME_STR = 'name'
     TOP_ALBUMS = 'topAlbums'
     try:
-        artist_name = artist[NAME_STR]
-        top_albums = artist[TOP_ALBUMS]
+        artist_name = artist.name
+        top_albums = artist.topAlbums
     except KeyError:
         raise KeyError('This artist object is malformed!!!')
     # build review file content
@@ -84,8 +56,8 @@ def searchCandidateReviews(artist):
 
 if __name__ == '__main__':
     dirChecking()
-    for file in scanArtistJSON():
-        try:
-            searchCandidateReviews(getArtistFile(file))
-        except BaseException as e:
-            print e.message
+    try:
+        for file in data_folder_reader.scanArtistFiles():
+            searchCandidateReviews(data_folder_reader.getArtistContent(file))
+    except BaseException as e:
+        print e.message
