@@ -1,11 +1,11 @@
-from services import freebase_service
 
 __author__ = 'zhoutuoyang'
 
 import os
 import time
+import data_folder_reader
+from services import freebase_service
 
-data_dir = './data'
 wiki_dir = './wiki'
 
 def dirChecking():
@@ -16,30 +16,31 @@ def dirChecking():
         os.mkdir(wiki_dir)
 
 
-def scanArtistJSON():
-    """
-        Grab all files end with .json
-        So make sure that every json file in data dir is about an artist
-    """
-    for file in os.listdir(data_dir):
-        if file.endswith('.json'):
-            yield file
-
-
 if __name__ == '__main__':
     dirChecking()
-    for file in scanArtistJSON():
-        # remove .json
-        artist = file[:-5]
-        url = freebase_service.getArtistWikiLink(artist)
-        # sleep for half a second
-        time.sleep(0.5)
-        if url:
-            try:
-                with open(os.path.join(wiki_dir, artist + '.txt'), mode='w') as f:
-                    f.write(url)
-            except IOError as e:
-                print e.message
+    try:
+        for file in data_folder_reader.scanArtistFiles():
+            # get artist object
+            artist = data_folder_reader.getArtistContent(file)
+            # get meta data
+            artist_name = artist.name
+            # get one of the album to get a better reconciliation
+            album = artist.topAlbums[0].name if artist.topAlbums else None
+            # get link
+            url = freebase_service.getArtistWikiLink(artist_name, album)
+            # sleep for half a second
+            time.sleep(0.5)
+            if url:
+                try:
+                    with open(os.path.join(wiki_dir, artist_name + '.txt'), mode='w') as f:
+                        f.write(url)
+                    print u"Finished {0}'s WIKI link file.".format(artist_name)
+                except IOError as e:
+                    print e.message
+            else:
+                print u"!!!NO {0}'s WIKI link file.".format(artist_name)
+    except BaseException as e:
+        print e
 
 
 

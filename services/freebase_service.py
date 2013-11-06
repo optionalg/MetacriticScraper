@@ -4,9 +4,9 @@ import re
 import requests
 
 try:
-    with open('google_api_key.txt') as f:
+    with open('services/google_api_key.txt') as f:
         api_key = f.read()
-except IOError:
+except IOError as e:
     print "There is something wrong with api key file."
     exit()
 
@@ -14,9 +14,6 @@ service_url = 'https://www.googleapis.com/freebase/v1/'
 rdf_url = service_url + 'rdf'
 topic_url = service_url + 'topic'
 reconciliation_url = service_url + 'reconcile'
-params = {
-    'key': api_key
-}
 
 
 def reconcile(name, kind, prop=None):
@@ -26,6 +23,9 @@ def reconcile(name, kind, prop=None):
         if requests throws out error, return empty string as well
     """
     # process arguments
+    params = {
+        'key': api_key
+    }
     params['name'] = name
     params['kind'] = kind
     if prop:
@@ -53,11 +53,13 @@ def reconcileAlbum(album, artist):
     return reconcile(album, '/music/album', '/music/album/artist:{0}'.format(artist))
 
 
-def reconcileArtist(artist):
+def reconcileArtist(artist, anyAlbum=None):
     """
         An implementated function specifically reconcile artist
     """
-    return reconcile(artist, '/music/artist')
+    if anyAlbum:
+        anyAlbum = '/music/artist/album: ' + anyAlbum
+    return reconcile(artist, '/music/artist', anyAlbum)
 
 
 def rdfLookup(mid):
@@ -105,9 +107,8 @@ def checkAlbumSingle(album, artist):
     return False
 
 
-def getArtistWikiLink(artist):
-    mid = reconcileArtist(artist)
-
+def getArtistWikiLink(artist, anyAlbum=None):
+    mid = reconcileArtist(artist, anyAlbum)
     if mid:
         filter = '/type/object/key'
         pattern = r'/wikipedia/en_id/(\d+)\"'
