@@ -33,17 +33,17 @@ def getBillBoardTopArtist(year):
 
 def getTopArtists(from_year, to_year):
     """
-        This methods return a dict with key as year and value as {artist - ranking mapping dict}
+        This methods return a dict with key as artist value as {year - ranking mapping}
     """
     data = {}
     for year in range(from_year, to_year + 1):
-        cur_year = {}
         # get an array of top artist from the year
         artists = getBillBoardTopArtist(year)
-        # process artist, ranking mapping
+        # process year, ranking mapping
         for ranking, artist in enumerate(artists):
-            cur_year[artist] = ranking
-        data[year] = cur_year
+            if artist not in data:
+                data[artist] = {}
+            data[artist][year] = ranking
     return data
 
 
