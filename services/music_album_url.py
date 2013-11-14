@@ -11,8 +11,8 @@ def get_candidate_urls(album_name):
     result = []
     # replace all spaces with '+' signs
     # remove all '/' signs
-    url = base_url.format(album_name.replace(' ', '+').replace('/', ''))
     try:
+        url = base_url.format(album_name.replace(' ', '+').replace('/', ''))
         soup = BeautifulSoup(urllib2.urlopen(url, timeout=_TIMEOUT))
         albums = soup.find_all('li', class_='result')
         for album in albums:
@@ -24,7 +24,7 @@ def get_candidate_urls(album_name):
                 'artist': titleTag.get('href').split('/')[-1].replace('-', ' ').title(),
                 'releaseDate': releaseDateTag.get_text().strip()
             })
-    except (urllib2.URLError, urllib2.HTTPError, socket.timeout) as e:
+    except BaseException as e:
         print u'Did not get {0} album candidate urls'.format(album_name)
         print e
     return result
