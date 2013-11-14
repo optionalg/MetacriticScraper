@@ -25,6 +25,6 @@ def get_candidate_urls(album_name):
                 'releaseDate': releaseDateTag.get_text().strip()
             })
     except (urllib2.URLError, urllib2.HTTPError, socket.timeout) as e:
-        print 'Did not get {0} album candidate urls'.format(album_name)
-        print e.message
+        print u'Did not get {0} album candidate urls'.format(album_name)
+        print e
     return result
