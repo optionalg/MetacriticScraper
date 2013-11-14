@@ -128,7 +128,7 @@ def getArtistProfile(name):
       "name": "{}",
       "mid": null,
       "type": "/music/artist",
-      "/common/topic/official_website": null,
+      "/common/topic/official_website": [],
       "/people/person/date_of_birth": null,
       "/people/person/place_of_birth": null,
       "/type/object/key": [{{
@@ -141,7 +141,8 @@ def getArtistProfile(name):
         "value": null
       }}],
       "/music/artist/album": [{{
-        "/music/album/release_type!=": "Single",
+        "/music/album/release_type": null,
+        "/music/album/album_content_type": [],
         "/music/album/release_date": null,
         "/music/album/release_date>=": "2000-01-01",
         "name": null,
@@ -167,7 +168,7 @@ def getArtistProfile(name):
       "/common/topic/alias": "{}",
       "mid": null,
       "type": "/music/artist",
-      "/common/topic/official_website": null,
+      "/common/topic/official_website": [],
       "/people/person/date_of_birth": null,
       "/people/person/place_of_birth": null,
       "/type/object/key": [{{
@@ -180,7 +181,8 @@ def getArtistProfile(name):
         "value": null
       }}],
       "/music/artist/album": [{{
-        "/music/album/release_type!=": "Single",
+        "/music/album/release_type": null,
+        "/music/album/album_content_type": [],
         "/music/album/release_date": null,
         "/music/album/release_date>=": "2000-01-01",
         "name": null,
