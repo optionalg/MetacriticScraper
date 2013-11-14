@@ -26,7 +26,7 @@ def get_top_artists(country="UNITED STATES", pages=10):
         2. mbid, musicbrainz unique ID for the aritist
     """
     artists_container = []
-    for page in range(pages):
+    for page in range(1, pages + 1):
         try:
             response = requests.get(last_fm_url, params={
                 'api_key': api_key,
