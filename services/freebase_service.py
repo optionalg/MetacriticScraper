@@ -1,10 +1,11 @@
 __author__ = 'zhoutuoyang'
 import json
+import os
 import re
 import requests
 
 try:
-    with open('services/google_api_key.txt') as f:
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'google_api_key.txt')) as f:
         api_key = f.read()
 except IOError as e:
     print "There is something wrong with api key file."
@@ -13,6 +14,7 @@ except IOError as e:
 service_url = 'https://www.googleapis.com/freebase/v1/'
 rdf_url = service_url + 'rdf'
 topic_url = service_url + 'topic'
+mqlread_url = service_url + 'mqlread'
 reconciliation_url = service_url + 'reconcile'
 
 
@@ -118,3 +120,106 @@ def getArtistWikiLink(artist, anyAlbum=None):
         if match:
             return url + match.group(1)
     return None
+
+
+def getArtistProfile(name):
+    query_string = u"""
+    {{
+      "name": "{}",
+      "mid": null,
+      "type": "/music/artist",
+      "/common/topic/official_website": null,
+      "/people/person/date_of_birth": null,
+      "/people/person/place_of_birth": null,
+      "/type/object/key": [{{
+        "namespace": "/authority/musicbrainz/artist",
+        "value": null,
+        "optional": "optional"
+      }}],
+      "ns0:/type/object/key": [{{
+        "namespace": "/wikipedia/en_id",
+        "value": null
+      }}],
+      "/music/artist/album": [{{
+        "/music/album/release_type!=": "Single",
+        "/music/album/release_date": null,
+        "/music/album/release_date>=": "2000-01-01",
+        "name": null,
+        "mid": null,
+        "/award/award_winning_work/awards_won": [{{
+          "year": null,
+          "award": null,
+          "optional": "optional"
+        }}]
+      }}],
+      "/award/award_winner/awards_won": [{{
+        "year": null,
+        "award": null,
+        "optional": "optional"
+      }}],
+      "/influence/influence_node/influenced_by": [],
+      "/influence/influence_node/influenced": []
+    }}
+    """.format(name)
+    backup = u"""
+    {{
+      "name": null,
+      "/common/topic/alias": "{}",
+      "mid": null,
+      "type": "/music/artist",
+      "/common/topic/official_website": null,
+      "/people/person/date_of_birth": null,
+      "/people/person/place_of_birth": null,
+      "/type/object/key": [{{
+        "namespace": "/authority/musicbrainz/artist",
+        "value": null,
+        "optional": "optional"
+      }}],
+      "ns0:/type/object/key": [{{
+        "namespace": "/wikipedia/en_id",
+        "value": null
+      }}],
+      "/music/artist/album": [{{
+        "/music/album/release_type!=": "Single",
+        "/music/album/release_date": null,
+        "/music/album/release_date>=": "2000-01-01",
+        "name": null,
+        "mid": null,
+        "/award/award_winning_work/awards_won": [{{
+          "year": null,
+          "award": null,
+          "optional": "optional"
+        }}]
+      }}],
+      "/award/award_winner/awards_won": [{{
+        "year": null,
+        "award": null,
+        "optional": "optional"
+      }}],
+      "/influence/influence_node/influenced_by": [],
+      "/influence/influence_node/influenced": []
+    }}
+
+    """.format(name)
+    try:
+        response = requests.get(mqlread_url, params = {
+            "key": api_key,
+            "query": query_string,
+            "uniqueness_failure": "soft"
+        })
+        res = json.loads(response.text)
+        if 'result' in res and res['result']:
+            return res['result']
+        else:
+            response = requests.get(mqlread_url, params={
+                "key": api_key,
+                "query": backup,
+                "uniqueness_failure": "soft"
+            })
+            res = json.loads(response.text)
+            if 'result' in res and res['result']:
+                return res['result']
+            else:
+                raise BaseException(res)
+    except BaseException as e:
+        raise e
