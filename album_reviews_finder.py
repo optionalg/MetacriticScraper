@@ -7,7 +7,7 @@ import json
 import re
 import time
 import data_folder_reader
-from services import music_album_url
+from services import metacritic_service
 
 data_dir = './freebase'
 reviews_dir = './review'
@@ -41,7 +41,7 @@ def searchCandidateReviews(profile):
         # checking content type
         if album[CONTENT_TYPE] and album[CONTENT_TYPE][0] != 'Studio album':
             continue
-        album['candidates'] = music_album_url.get_candidate_urls(album[NAME])
+        album['candidates'] = metacritic_service.getAlbumUrls(album[NAME])
         albums_with_reivews.append(album)
         # for each call, delay for 1 second
         time.sleep(0.5)
