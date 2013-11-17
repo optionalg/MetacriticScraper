@@ -1,6 +1,7 @@
 __author__ = 'zhoutuoyang'
 import time
 import json
+import os
 import requests
 from models.album import Album
 from models.artist import Artist
@@ -10,7 +11,7 @@ _MINIMUM_DELAY = 1
 TIMEOUT_SEC = 60
 delay_time = _MINIMUM_DELAY # default delay after API call in case of banning account
 try:
-    with open('services/last_fm_api_key.txt') as f:
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'last_fm_api_key.txt')) as f:
         api_key = f.read()
 except IOError:
     print "There is something wrong with api key file."
