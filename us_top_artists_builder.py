@@ -1,4 +1,4 @@
-from services import last_fm_top_artists
+from services import last_fm_service
 
 __author__ = 'zhoutuoyang'
 import os
@@ -38,7 +38,7 @@ def writeArtistJSON(artist):
 
 def buildArtistsJSON():
     # get all the artists
-    artists = last_fm_top_artists.get_top_artists("UNITED STATES", 10) # by default it is 10 pages, each with 50 aritists
+    artists = last_fm_service.get_top_artists("UNITED STATES", 10) # by default it is 10 pages, each with 50 aritists
     for artist in artists:
         writeArtistJSON(artist)
 
