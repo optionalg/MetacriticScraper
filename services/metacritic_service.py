@@ -115,7 +115,7 @@ def scrapeAlbumPage(url):
 
 def scrapeArtistPage(url):
     try:
-        soup = BeautifulSoup(urllib2.urlopen(url, timeout=_TIMEOUT))
+        soup = BeautifulSoup(urllib2.urlopen(url + '?filter-options=music', timeout=_TIMEOUT))
     except (urllib2.URLError, urllib2.HTTPError) as e:
         raise e
     artist_name = soup.find('div', class_='person_title').get_text().strip()
